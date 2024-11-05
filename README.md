@@ -1,6 +1,6 @@
-# GHCC Appointment Management System
+# Global Hearing Care Centre (GHCC) Appointment Management System
 
-This is an internal appointment management system built with [Next.js](https://nextjs.org), designed to streamline staff-patient appointment scheduling with WhatsApp integration. Live system is available at [GHCC System](https://ghcc-system.vercel.app).
+This is an internal appointment management system designed to streamline staff-patient appointment scheduling with WhatsApp integration. This system is a complete revamp from [previous Flutter web version](https://ghcc-system.web.app), rebuilt using Next.js to provide better performance and user experience. Live system is available at [GHCC System](https://ghcc-system.vercel.app).
 
 ## About The System
 

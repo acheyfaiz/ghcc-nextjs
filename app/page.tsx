@@ -24,6 +24,10 @@ export default function Home() {
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
+    if (!formData.type) {
+      newErrors.type = 'Appointment type is required';
+    }
+
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     }
@@ -52,18 +56,38 @@ export default function Home() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       [name]: value
-    }));
+    };
+    setFormData(updatedFormData);
+
     // Clear error when user starts typing
     if (errors[name as keyof FormData]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
       }));
+    }
+  };
+
+  const handleGenerate = () => {
+    if (validateForm()) {
+      const appointmentDetails = getAppointmentTypeText(formData.type);
+      const summaryText = `
+Patient Details:
+---------------
+Appointment Type: ${appointmentDetails}
+Description: ${getAppointmentDescription(formData.type)}
+${formData.name ? `Name: ${formData.name}` : ''}
+${formData.phone ? `Phone: ${formData.phone}` : ''}
+${formData.date ? `Date: ${new Date(formData.date).toLocaleDateString()}` : ''}
+${formData.time ? `Time: ${formData.time}` : ''}
+      `.trim();
+      
+      setSummary(summaryText);
     }
   };
 
@@ -80,20 +104,18 @@ export default function Home() {
     return types[value] || value;
   };
 
-  const handleGenerate = () => {
-    if (validateForm()) {
-      const summaryText = `
-Patient Details:
----------------
-Appointment Type: ${getAppointmentTypeText(formData.type)}
-Name: ${formData.name}
-Phone: ${formData.phone}
-Date: ${new Date(formData.date).toLocaleDateString()}
-Time: ${formData.time}
-      `.trim();
-      
-      setSummary(summaryText);
-    }
+  // Add this new function to provide descriptions
+  const getAppointmentDescription = (value: string): string => {
+    const descriptions: { [key: string]: string } = {
+      'homevisit': 'Our specialist will visit your home for a hearing assessment.',
+      'collect': 'Pick up your new or repaired hearing aid from our clinic.',
+      'fitting': 'Get your hearing aid properly fitted and adjusted.',
+      'deposit-repair': 'Leave your hearing aid for repair and maintenance.',
+      'impression': 'Get ear impressions taken for custom hearing aids.',
+      'hospital-followup': 'Follow-up consultation after hospital appointment.',
+      'purchase': 'Consultation for new hearing aid purchase.'
+    };
+    return descriptions[value] || '';
   };
 
   return (
@@ -102,6 +124,34 @@ Time: ${formData.time}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">GHCC Patient Appointment Form</h1>
         
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+
+        <div>
+            <label htmlFor="type" className="block mb-1 text-sm font-medium text-gray-700">
+              Appointment Type
+            </label>
+            <select
+              id="type"
+              name="type"
+              value={formData.type}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange(e)}
+              className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
+                errors.type ? 'border-red-500' : 'border-gray-300'
+              }`}
+            >
+              <option value="">Select appointment type</option>
+              <option value="homevisit">Home Visit</option>
+              <option value="collect">Collect Hearing Aid</option>
+              <option value="fitting">Fitting Hearing Aid</option>
+              <option value="deposit-repair">Deposit Repair Hearing Aid</option>
+              <option value="impression">Impression Taking</option>
+              <option value="hospital-followup">Hospital Appointment Followup</option>
+              <option value="purchase">Hearing Aid Purchases</option>
+            </select>
+            {errors.type && (
+              <p className="mt-1 text-sm text-red-500">{errors.type}</p>
+            )}
+          </div>
+          
           <div>
             <label htmlFor="name" className="block mb-1 text-sm font-medium text-gray-700">
               Patient Name
@@ -177,34 +227,7 @@ Time: ${formData.time}
             {errors.time && (
               <p className="mt-1 text-sm text-red-500">{errors.time}</p>
             )}
-          </div>
-
-          <div>
-            <label htmlFor="type" className="block mb-1 text-sm font-medium text-gray-700">
-              Appointment Type
-            </label>
-            <select
-              id="type"
-              name="type"
-              value={formData.type}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange(e)}
-              className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
-                errors.type ? 'border-red-500' : 'border-gray-300'
-              }`}
-            >
-              <option value="">Select appointment type</option>
-              <option value="homevisit">Home Visit</option>
-              <option value="collect">Collect Hearing Aid</option>
-              <option value="fitting">Fitting Hearing Aid</option>
-              <option value="deposit-repair">Deposit Repair Hearing Aid</option>
-              <option value="impression">Impression Taking</option>
-              <option value="hospital-followup">Hospital Appointment Followup</option>
-              <option value="purchase">Hearing Aid Purchases</option>
-            </select>
-            {errors.type && (
-              <p className="mt-1 text-sm text-red-500">{errors.type}</p>
-            )}
-          </div>
+          </div>          
 
           <button
             type="button"
